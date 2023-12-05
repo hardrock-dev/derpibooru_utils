@@ -26,7 +26,9 @@ class DerpibooruClient:
             return SearchPayload.from_dict(payload)
 
     async def iter_search(self, query: str, start_page=1, **search_kwargs):
-        current_page, fetched, total = start_page, 0, 1.1
+        current_page = start_page
+        fetched = (start_page - 1) * search_kwargs.get('per_page', 50)
+        total = 1.1
         while fetched < total:
             response = await self.search_images(query, page=current_page, **search_kwargs)
             if total != 1.1 and total != response.total:
