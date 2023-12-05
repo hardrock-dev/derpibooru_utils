@@ -89,7 +89,7 @@ async def sync_images_by_query(
             *(save_image_tags(tags_dir, img, recheck_saved=False) for img in images), return_exceptions=True)
         for res in results:
             if isinstance(res, Exception):
-                log.exception(f'Exception in save_image_tags', exc_info=res)
+                log.exception('Exception in save_image_tags', exc_info=res)
 
     with tqdm(total=len(images), desc='Downloading images') as pbar:
         results = await asyncio.gather(
@@ -99,4 +99,5 @@ async def sync_images_by_query(
             if isinstance(res, Exception):
                 log.exception(f'Cannot download {img.id}', exc_info=res)
 
+    log.info('Done!')
     return images
