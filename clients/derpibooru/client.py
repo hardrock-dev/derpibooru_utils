@@ -39,8 +39,10 @@ class DerpibooruClient:
                     f'from {total} to {response.total}. {query=!r}')
             total = response.total
             if (not response.images) and total:
+                # This can happen if you are requesting a non-existing page
+                # or the total number of search results has changed during iterations
                 log.warning(
-                    f'Page {current_page} has no images. Processed {fetched}/{total} results. {query=!r}')
+                    f'Page {current_page} has no images. Total results count={total}. {query=!r}')
                 break
             yield response
             current_page += 1
