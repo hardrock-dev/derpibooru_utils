@@ -4,6 +4,8 @@ from aiohttp import ClientSession, TCPConnector
 
 from models.derpibooru import Image, SearchPayload
 
+log = logging.getLogger('derpibooru_client')
+
 
 class DerpibooruFilters:
     EVERYTHING = 56027
@@ -28,16 +30,18 @@ class DerpibooruClient:
     async def iter_search(self, query: str, start_page=1, **search_kwargs):
         current_page = start_page
         fetched = (start_page - 1) * search_kwargs.get('per_page', 50)
-        total = 1.1
+        total = fetched + 1.1
         while fetched < total:
             response = await self.search_images(query, page=current_page, **search_kwargs)
-            if total != 1.1 and total != response.total:
-                logging.getLogger(__name__).warning(
+            if isinstance(total, int) and total != response.total:
+                log.warning(
                     f'Number of images matching the query during iterations changed '
                     f'from {total} to {response.total}. {query=!r}')
             total = response.total
-            if total == 1.1:
-                total = response.total
+            if (not response.images) and total:
+                log.warning(
+                    f'Page {current_page} has no images. Processed {fetched}/{total} results. {query=!r}')
+                break
             yield response
             current_page += 1
             fetched += len(response.images)
